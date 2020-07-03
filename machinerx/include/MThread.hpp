@@ -190,11 +190,8 @@ namespace MachineRX
     uint32_t thread_stack_depth;
     uint32_t thread_priority;
     uint32_t t_sampling_ms;
-    struct timespec ts
-    {
-    };
+    struct timespec ts{};
     bool initializedDelay;
-    // TickType_t previousWakeTick { 0 };
     uint32_t thread_start_ns{0};
     uint32_t task_excution_ns{0};
     ThreadStatus_t thread_status;

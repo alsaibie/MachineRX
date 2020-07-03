@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
   /*  No pthread_join just a while loop - consistent with mcu */
   while (1)
   {
-    /* code - maybe some blinky */
+    /* code - maybe some blinks */
   }
   
   return 1;
