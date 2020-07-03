@@ -32,8 +32,6 @@
 #define _MACHINERX_HPP_
 
 #include "MThread.hpp"
-#include "MQueue.hpp"
+#include "MTopic.hpp"
 
-
-#endif //_MACHINERX_HPP_
-
+#endif  //_MACHINERX_HPP_
