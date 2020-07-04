@@ -22,33 +22,59 @@
  * SOFTWARE.
  * 
  * 
- * File: main.c
+ * File: MService.hpp
  * Project: MachineRX
  * Author: Ali AlSaibie (ali.alsaibie@ku.edu.kw)
  * -----
  * Modified By: Ali AlSaibie (ali.alsaibie@ku.edu.kw>)
  */
+#ifndef _MSERVICE_HPP_
+#define _MSERVICE_HPP_
 
-#include "main_app.hpp"
-#include <pthread.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+
+#ifdef __cpluplus
+extern "C" {
+#endif
 #include <assert.h>
-#include <stdint.h>
+#include <malloc.h>
+#include <pthread.h>
 
-int main(int argc, char *argv[])
-{
-  
-  uint32_t ret;
-  pthread_t tid;
-  tid = pthread_self();
-  ret = pthread_setname_np(tid, "Background");
-
-  main_app();
-
-  /*  No pthread_join just a while loop - consistent with mcu */
-  while (1)
-  {
-    /* code - maybe some blinks */
-  }
-  
-  return 1;
+#ifdef __cpluplus
 }
+#endif
+
+#include <functional>
+#include <vector>
+
+inline static pthread_mutex_t gservice_initialization_mutex;
+inline void initialize_service_mutex(void) {
+    pthread_mutex_init(&gservice_initialization_mutex, NULL);
+}
+
+namespace MachineRX {
+
+extern timespec gts_start;
+
+typedef uint32_t sd_t;
+
+struct _srvCore {
+    uint32_t tick_stamp_ms{0};
+    uint32_t srv_count{0};
+};
+
+typedef struct {
+    const char *name;
+    const uint32_t length;
+    sd_t id{'\0'};
+    pthread_mutex_t srv_access_mutex{NULL};
+    void *srvPtr{NULL};
+} MServiceHandle_t;
+
+
+
+} // namespace MachineRX
+
+#endif // _MSERVICE_HPP_

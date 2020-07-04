@@ -42,8 +42,6 @@ extern "C" {
 #include <assert.h>
 #include <malloc.h>
 #include <pthread.h>
-// #include <limits.h>
-
 
 #ifdef __cpluplus
 }
@@ -52,7 +50,7 @@ extern "C" {
 #include <functional>
 #include <vector>
 
-
+//TODO: Add assert guards
 
 inline static pthread_mutex_t gtopic_initialization_mutex;
 inline void initialize_topic_mutex(void) {
@@ -141,7 +139,7 @@ class MTopicBase_ {
     inline void destroy_shared_memspace() {
         free(th.msgPtr);  //TODO: replace with custom per platform dealloc
     }
-};  // namespace MachineRX
+};  
 
 template <typename MTopicMsgT>
 class MTopicPublisher : public MTopicBase_ {
@@ -154,13 +152,14 @@ class MTopicPublisher : public MTopicBase_ {
         msgCore->msg_count++;
         struct timespec ts;
         if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-            // fail TODO
+            // Fail
         }
         msgCore->tick_stamp_ms = timespec_to_ms(ts, gts_start);
         pthread_mutex_lock(&th.msg_access_mutex);  // TODO: replace with a timed lock, or try lock?
         (void)memcpy((void *)th.msgPtr, &msg, (size_t)msgSize);
         pthread_mutex_unlock(&th.msg_access_mutex);
         // TODO: Implement a msg queue of a given length - subscribers may need to process a buffer
+        // TODO: Alternatively, have the the receiver accumulate data if needed and then process on demand.
     }
 };
 

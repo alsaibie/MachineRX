@@ -22,33 +22,60 @@
  * SOFTWARE.
  * 
  * 
- * File: main.c
+ * File: MAction.hpp
  * Project: MachineRX
  * Author: Ali AlSaibie (ali.alsaibie@ku.edu.kw)
  * -----
  * Modified By: Ali AlSaibie (ali.alsaibie@ku.edu.kw>)
  */
 
-#include "main_app.hpp"
-#include <pthread.h>
+#ifndef _ACTION_HPP_
+#define _ACTION_HPP_
+
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+
+#ifdef __cpluplus
+extern "C" {
+#endif
 #include <assert.h>
-#include <stdint.h>
+#include <malloc.h>
+#include <pthread.h>
 
-int main(int argc, char *argv[])
-{
-  
-  uint32_t ret;
-  pthread_t tid;
-  tid = pthread_self();
-  ret = pthread_setname_np(tid, "Background");
-
-  main_app();
-
-  /*  No pthread_join just a while loop - consistent with mcu */
-  while (1)
-  {
-    /* code - maybe some blinks */
-  }
-  
-  return 1;
+#ifdef __cpluplus
 }
+#endif
+
+#include <functional>
+#include <vector>
+
+inline static pthread_mutex_t gaction_initialization_mutex;
+inline void initialize_action_mutex(void) {
+    pthread_mutex_init(&gaction_initialization_mutex, NULL);
+}
+
+namespace MachineRX {
+
+extern timespec gts_start;
+
+typedef uint32_t ad_t;
+
+struct _actCore {
+    uint32_t tick_stamp_ms{0};
+    uint32_t act_count{0};
+};
+
+typedef struct {
+    const char *name;
+    const uint32_t length;
+    ad_t id{'\0'};
+    pthread_mutex_t act_access_mutex{NULL};
+    void *actPtr{NULL};
+} MActionHandle_t;
+
+
+
+} // namespace MachineRX
+
+#endif // _ACTION_HPP_

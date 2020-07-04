@@ -39,13 +39,12 @@ timespec MachineRX::gts_start;
 
 void main_app(void) {
 
+    //TODO: Add assert guards
+
     initialize_topic_mutex();
 
     clock_gettime(CLOCK_MONOTONIC, &MachineRX::gts_start);
 
     start_application_1();
     start_application_2();
-
-    while(1){}
-
 }
