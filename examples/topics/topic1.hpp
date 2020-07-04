@@ -22,28 +22,28 @@
  * SOFTWARE.
  * 
  * 
- * File: main_app.hpp
+ * File: topic1.hpp
  * Project: MachineRX
  * Author: Ali AlSaibie (ali.alsaibie@ku.edu.kw)
  * -----
  * Modified By: Ali AlSaibie (ali.alsaibie@ku.edu.kw>)
  */
+#ifndef _TOPIC1_HPP_
+#define _TOPIC1_HPP_
 
-#ifndef _MAIN_APP_HPP_
-#define _MAIN_APP_HPP_
+#include "MTopic.hpp"
+using namespace MachineRX;
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+typedef struct : public _msgCore {
+  struct {
+    int a{0};
+    // char buf[20]{};
+    // float f{};
+  }P;
 
-void main_app(void);
+} Topic1_msg_t;
 
-#ifdef __cplusplus
-}
-#endif
+inline MachineRX::MTopicHandle_t gTopic1MTHandle{"Topic 1", 1}; /* The rest NULLs */
 
-void start_application_1(void);
-void start_application_2(void);
 
-#endif //_MAIN_APP_HPP_
+#endif /* _TOPIC1_HPP_ */

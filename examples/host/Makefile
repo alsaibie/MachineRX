@@ -14,6 +14,7 @@ BUILD_DIR ?= ./build
 SRC_DIRS  ?= ./src
 MRX_DIR   ?= ../../machinerx
 APPS_DIR  ?= ../apps
+TOPICS_DIR ?= ../topics
 
 SRC_DIRS += $(APPS_DIR)/
 
@@ -35,6 +36,7 @@ ASM_SOURCE  = $(shell find $(SRC_DIRS) -name *.s)
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_DIRS += $(MRX_DIR)/include
 INC_DIRS += $(APPS_DIR)
+INC_DIRS += $(TOPICS_DIR)
 
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 

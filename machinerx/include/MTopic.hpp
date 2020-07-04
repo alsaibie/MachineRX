@@ -39,10 +39,11 @@
 #ifdef __cpluplus
 extern "C" {
 #endif
-
 #include <assert.h>
+#include <malloc.h>
 #include <pthread.h>
 // #include <limits.h>
+
 
 #ifdef __cpluplus
 }
@@ -51,19 +52,30 @@ extern "C" {
 #include <functional>
 #include <vector>
 
+
+
+inline static pthread_mutex_t gtopic_initialization_mutex;
+inline void initialize_topic_mutex(void) {
+    pthread_mutex_init(&gtopic_initialization_mutex, NULL);
+}
+
 namespace MachineRX {
+
+extern timespec gts_start;
 
 typedef uint32_t td_t;
 
-typedef struct _msgCore {
+struct _msgCore {
     uint32_t tick_stamp_ms{0};
     uint32_t msg_count{0};
-} MsgCore_T;
+};
 
 typedef struct {
-    const td_t id{};
     const char *name;
-    const uint32_t size;
+    const uint32_t length;
+    td_t id{'\0'};
+    pthread_mutex_t msg_access_mutex{NULL};
+    void *msgPtr{NULL};
 } MTopicHandle_t;
 
 class MTopicBase_ {
@@ -76,42 +88,33 @@ class MTopicBase_ {
         return th.id;
     }
 
-    inline const uint32_t getSize() {
-        return th.size;
+    inline const uint32_t getLength() {
+        return th.length;
     }
 
     /* Requires C++17 */
     inline static std::vector<MTopicHandle_t *> ptrMTH;
-    inline static timespec ts_start{0, 0};
     inline static bool time_spec_offset{false};
+    inline static uint32_t id_counter{0};
 
    protected:
-    MTopicBase_(MTopicHandle_t &th_, uint32_t msg_size) : th(th_) {
-        if (NULL == th.id) {
-            pthread_mutex_init(&msg_access_mutex, NULL);
-            msgPtr = create_shared_memspace(msg_size);
-            ptrMTH.push_back(&th);
-        }
-        if (time_spec_offset == false) {
-            if (clock_gettime(CLOCK_MONOTONIC, &ts_start) != 0) {
-                // fail TODO
+    MTopicBase_(MTopicHandle_t &th_, uint32_t msgSize_) : th(th_), msgSize(msgSize_) {
+        if (th.id == '\0') {
+            pthread_mutex_lock(&gtopic_initialization_mutex);
+            /* Check again in case it was initialized while waiting for mutex lock */
+            if (th.id == '\0') {
+                th.id = id_counter + 1;
+                id_counter++;
+                pthread_mutex_init(&th.msg_access_mutex, NULL);
+                th.msgPtr = create_shared_memspace(msgSize);
+                ptrMTH.push_back(&th);
             }
+            pthread_mutex_unlock(&gtopic_initialization_mutex);
         }
     }
     ~MTopicBase_() {
         //TODO: pop out of vector ptrMTH
         destroy_shared_memspace();
-    }
-
-   private:
-    inline void *create_shared_memspace(uint32_t size) {
-        void *ptr = malloc(size);
-        memset(ptr, 0, size);  //TODO: replace with custom per platform allocate
-        return ptr;
-    }
-
-    inline void destroy_shared_memspace() {
-        free(msgPtr);  //TODO: replace with custom per platform dealloc
     }
 
     inline uint32_t timespec_to_ms(struct timespec &ts_f, struct timespec &ts_i) {
@@ -125,10 +128,20 @@ class MTopicBase_ {
         return t_ms;
     }
 
-    MTopicHandle_t th;
-    pthread_mutex_t msg_access_mutex;
-    void *msgPtr;
-};
+    MTopicHandle_t &th;
+    uint32_t msgSize;
+
+   private:
+    inline void *create_shared_memspace(uint32_t size) {
+        void *ptr = malloc(size);  //TODO: replace with custom per platform allocate
+        memset(ptr, 0, size);
+        return ptr;
+    }
+
+    inline void destroy_shared_memspace() {
+        free(th.msgPtr);  //TODO: replace with custom per platform dealloc
+    }
+};  // namespace MachineRX
 
 template <typename MTopicMsgT>
 class MTopicPublisher : public MTopicBase_ {
@@ -137,42 +150,42 @@ class MTopicPublisher : public MTopicBase_ {
     }
 
     inline uint32_t publish(MTopicMsgT &msg) {
-        MsgCore_T *msgCore = static_cast<MsgCore_T *>(&msg);
+        _msgCore *msgCore = static_cast<_msgCore *>(&msg);
         msgCore->msg_count++;
         struct timespec ts;
         if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
             // fail TODO
         }
-        msgCore->tick_stamp_ms = timespec_to_ms(&ts, &ts_start);
-        pthread_mutex_lock(&msg_access_mutex);  // TODO: replace with a timed lock, or try lock?
-        memset(msgPtr, &msg, th.size);
-        pthread_mutex_unlock(&msg_access_mutex);
+        msgCore->tick_stamp_ms = timespec_to_ms(ts, gts_start);
+        pthread_mutex_lock(&th.msg_access_mutex);  // TODO: replace with a timed lock, or try lock?
+        (void)memcpy((void *)th.msgPtr, &msg, (size_t)msgSize);
+        pthread_mutex_unlock(&th.msg_access_mutex);
         // TODO: Implement a msg queue of a given length - subscribers may need to process a buffer
     }
 };
 
 template <typename MTopicMsgT>
 class MTopicSubscriber : public MTopicBase_ {
-    typedef std::function<void(const MQueuemsgT &)> callbackT;
+    typedef std::function<void(const MTopicMsgT &)> callbackT;
 
    public:
-    MTopicSubscriber(MTopicHandle_t &th, callbackT cb_) : MTopicBase_(qh, sizeof(MTopicMsgT)),
+    MTopicSubscriber(MTopicHandle_t &th, callbackT cb_) : MTopicBase_(th, sizeof(MTopicMsgT)),
                                                           cb(cb_),
                                                           previous_tick_stamp(0),
                                                           previous_msg_count(0) {
     }
 
     inline uint32_t read() {
-        pthread_mutex_lock(&msg_access_mutex);  //TODO: replace with a timed lock, or try lock?
-        memcpy(&msg, &msgPtr, th.size);
-        pthread_mutex_unlock(&msg_access_mutex);
+        pthread_mutex_lock(&th.msg_access_mutex);  //TODO: replace with a timed lock, or try lock?
+        (void)memcpy((void *)&msg, (void *)th.msgPtr, (size_t)msgSize);
+        pthread_mutex_unlock(&th.msg_access_mutex);
 
-        MsgCore_T *msgCore = static_cast<MsgCore_T *>(&msg);
+        _msgCore *msgCore = static_cast<_msgCore *>(&msg);
         previous_tick_stamp = msgCore->tick_stamp_ms;
         if (msgCore->msg_count > previous_msg_count) {
             previous_msg_count = msgCore->msg_count;
             cb(msg);
-            //TODO: define return types
+            //TODO: define error return types, any standard posix?
             return 1;
         } else {
             return 0;

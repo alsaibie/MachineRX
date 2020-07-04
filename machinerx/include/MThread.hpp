@@ -104,7 +104,7 @@ class MThread {
     }
 
     inline const uint32_t getThreadPriority() {
-        /* Explicit get priorit call */
+        /* Explicit get priority call */
         struct sched_param param;
         int ret;
 

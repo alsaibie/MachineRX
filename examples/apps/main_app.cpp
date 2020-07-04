@@ -30,50 +30,22 @@
  */
 
 #include "main_app.hpp"
+
 #include <stdio.h>
+
 #include "MachineRX.hpp"
 
-using namespace MachineRX;
+timespec MachineRX::gts_start;
 
-class TestManager : public MThread
-{
-public:
-    TestManager() : MThread("Test Manager", 512, 2, 1000)
-    {
-    }
-    virtual ~TestManager()
-    {
-    }
+void main_app(void) {
 
-protected:
-    virtual void run()
-    {
+    initialize_topic_mutex();
 
-        printf("Thread Priority: %d\n", getThreadPriority());
-        printf("Thread Name: ");
-        printf(getThreadName());
-        printf("\n");
+    clock_gettime(CLOCK_MONOTONIC, &MachineRX::gts_start);
 
-        while (1)
-        {
-            struct timespec begin, end;
-            double elapsed;
-            clock_gettime(CLOCK_MONOTONIC, &begin);
+    start_application_1();
+    start_application_2();
 
-            msleep(2);
-            thread_lap();
+    while(1){}
 
-            clock_gettime(CLOCK_MONOTONIC, &end);
-            elapsed = end.tv_sec - begin.tv_sec;
-            elapsed += (end.tv_nsec - begin.tv_nsec) / 1000000000.0L;
-            printf("ET %fms\n", elapsed * 1000L);
-        }
-    }
-};
-
-void main_app(void)
-{
-    TestManager *ptr = new TestManager();
-    ptr->start();
-    printf("Hi\n");
 }
