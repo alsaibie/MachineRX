@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
   tid = pthread_self();
   ret = pthread_setname_np(tid, "Background");
 
-  main_app();
+  main_app(argc, argv);
 
   /*  No pthread_join just a while loop - consistent with mcu */
   while (1)
