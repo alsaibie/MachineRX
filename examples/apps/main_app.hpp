@@ -37,7 +37,7 @@ extern "C"
 {
 #endif
 
-void main_app(void);
+int main_app(int argc, char **argv);
 
 #ifdef __cplusplus
 }

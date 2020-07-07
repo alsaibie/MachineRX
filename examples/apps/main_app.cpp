@@ -30,20 +30,13 @@
  */
 
 #include "main_app.hpp"
-
-#include <stdio.h>
-
 #include "MachineRX.hpp"
 
-timespec MachineRX::gts_start;
-
-void main_app(void) {
+int main_app(int argc, char **argv){
 
     //TODO: Add assert guards
-
-    initialize_topic_mutex();
-
-    clock_gettime(CLOCK_MONOTONIC, &MachineRX::gts_start);
+    MachineRX::initialize_start_timespec();
+    MachineRX::initialize_topic_mutex();
 
     start_application_1();
     start_application_2();
