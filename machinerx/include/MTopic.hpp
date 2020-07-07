@@ -31,7 +31,7 @@
 
 #ifndef _MTOPIC_HPP_
 #define _MTOPIC_HPP_
-
+#include "MUtil.hpp"
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -40,8 +40,8 @@
 extern "C" {
 #endif
 #include <assert.h>
-#include <malloc.h>
-#include <pthread.h>
+// #include <malloc.h>
+// #include "pthread.h"
 
 #ifdef __cpluplus
 }
@@ -50,16 +50,15 @@ extern "C" {
 #include <functional>
 #include <vector>
 
+
 //TODO: Add assert guards
+
+namespace MachineRX {
 
 inline static pthread_mutex_t gtopic_initialization_mutex;
 inline void initialize_topic_mutex(void) {
     pthread_mutex_init(&gtopic_initialization_mutex, NULL);
 }
-
-namespace MachineRX {
-
-extern timespec gts_start;
 
 typedef uint32_t td_t;
 
@@ -72,7 +71,7 @@ typedef struct {
     const char *name;
     const uint32_t length;
     td_t id{'\0'};
-    pthread_mutex_t msg_access_mutex{NULL};
+    pthread_mutex_t msg_access_mutex{};
     void *msgPtr{NULL};
 } MTopicHandle_t;
 
@@ -112,18 +111,9 @@ class MTopicBase_ {
     }
     ~MTopicBase_() {
         //TODO: pop out of vector ptrMTH
+        //TODO: release mutex
+        //TODO: 
         destroy_shared_memspace();
-    }
-
-    inline uint32_t timespec_to_ms(struct timespec &ts_f, struct timespec &ts_i) {
-        uint32_t t_ms = (ts_f.tv_sec - ts_i.tv_sec) * 1000L;
-        int32_t delta_tms = (ts_f.tv_nsec / 1000000L - ts_i.tv_nsec / 1000000L);
-        if (delta_tms >= 0) {
-            t_ms += delta_tms;
-        } else {
-            t_ms += 1000 + delta_tms;
-        }
-        return t_ms;
     }
 
     MTopicHandle_t &th;
@@ -131,13 +121,13 @@ class MTopicBase_ {
 
    private:
     inline void *create_shared_memspace(uint32_t size) {
-        void *ptr = malloc(size);  //TODO: replace with custom per platform allocate
+        void *ptr = mxr_allocator.malloc(size);  //TODO: replace with custom per platform allocate
         memset(ptr, 0, size);
         return ptr;
     }
 
     inline void destroy_shared_memspace() {
-        free(th.msgPtr);  //TODO: replace with custom per platform dealloc
+        mxr_allocator.free(th.msgPtr);  //TODO: replace with custom per platform dealloc
     }
 };  
 
@@ -150,11 +140,7 @@ class MTopicPublisher : public MTopicBase_ {
     inline uint32_t publish(MTopicMsgT &msg) {
         _msgCore *msgCore = static_cast<_msgCore *>(&msg);
         msgCore->msg_count++;
-        struct timespec ts;
-        if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-            // Fail
-        }
-        msgCore->tick_stamp_ms = timespec_to_ms(ts, gts_start);
+        msgCore->tick_stamp_ms = uptime_ms();
         pthread_mutex_lock(&th.msg_access_mutex);  // TODO: replace with a timed lock, or try lock?
         (void)memcpy((void *)th.msgPtr, &msg, (size_t)msgSize);
         pthread_mutex_unlock(&th.msg_access_mutex);
@@ -169,9 +155,7 @@ class MTopicSubscriber : public MTopicBase_ {
 
    public:
     MTopicSubscriber(MTopicHandle_t &th, callbackT cb_) : MTopicBase_(th, sizeof(MTopicMsgT)),
-                                                          cb(cb_),
-                                                          previous_tick_stamp(0),
-                                                          previous_msg_count(0) {
+                                                          cb(cb_) {
     }
 
     inline uint32_t read() {
@@ -194,8 +178,8 @@ class MTopicSubscriber : public MTopicBase_ {
    private:
     MTopicMsgT msg;
     callbackT cb;
-    uint32_t previous_tick_stamp;
-    uint32_t previous_msg_count;
+    uint32_t previous_tick_stamp{0};
+    uint32_t previous_msg_count{0};
 };
 
 }  // namespace MachineRX

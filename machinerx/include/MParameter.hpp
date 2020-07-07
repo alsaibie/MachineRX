@@ -40,8 +40,8 @@
 extern "C" {
 #endif
 #include <assert.h>
-#include <malloc.h>
-#include <pthread.h>
+// #include <malloc.h>
+// #include <pthread.h>
 
 #ifdef __cpluplus
 }
@@ -49,18 +49,29 @@ extern "C" {
 
 #include <functional>
 #include <vector>
+#include "MUtil.hpp"
+
+/*
+*   Hashing notes:
+*   
+*   Concept: Usually a paramater is set from a user interface (ROS/PC Comms) and directly to a thread/block
+*   
+*   Each block/thread registers its parameters as objects, they are saved in a list. 
+*   The setter knows the parameter object type, and the target. from setter: set(target, parameters)
+*   
+*   The receiver checks periodically for new parameters
+*   The External Interface can also advertise the list of parameters/threads
+*   
+* */
+
+namespace MachineRX {
 
 inline static pthread_mutex_t gparameter_initialization_mutex;
 inline void initialize_parameter_mutex(void) {
     pthread_mutex_init(&gparameter_initialization_mutex, NULL);
 }
 
-namespace MachineRX {
-
-extern timespec gts_start;
-
 typedef uint32_t pd_t;
-
 
 struct _prmCore {
     uint32_t tick_stamp_ms{0};
@@ -71,7 +82,7 @@ typedef struct {
     const char *name;
     const uint32_t length;
     pd_t id{'\0'};
-    pthread_mutex_t prm_access_mutex{NULL};
+    pthread_mutex_t prm_access_mutex{};
     void *prmPtr{NULL};
 } MParameterHandle_t;
 
@@ -114,17 +125,6 @@ class MParameterBase_ {
         destroy_shared_memspace();
     }
 
-    inline uint32_t timespec_to_ms(struct timespec &ts_f, struct timespec &ts_i) {
-        uint32_t t_ms = (ts_f.tv_sec - ts_i.tv_sec) * 1000L;
-        int32_t delta_tms = (ts_f.tv_nsec / 1000000L - ts_i.tv_nsec / 1000000L);
-        if (delta_tms >= 0) {
-            t_ms += delta_tms;
-        } else {
-            t_ms += 1000 + delta_tms;
-        }
-        return t_ms;
-    }
-
     MParameterHandle_t &ph;
     uint32_t prmSize;
 
@@ -139,6 +139,22 @@ class MParameterBase_ {
         free(ph.prmPtr);  //TODO: replace with custom per platform dealloc
     }
 }; 
+
+template <typename MParameterT>
+class MParameterPublisher : public MParameterBase_ {
+    public:
+    MParameterPublisher(MParameterT &ph) : MParameterBase_(ph, sizeof(MParameterT)){
+        //TODO: publish or send to target?
+    }
+
+    inline uint32_t set(MParameterT &msg){
+        //TODO: 
+    }
+
+    inline uint32_t get(){
+
+    }
+};
 
 } // namespace MachineRX
 

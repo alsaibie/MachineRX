@@ -30,12 +30,11 @@
  */
 #ifndef _MTHREAD_HPP_
 #define _MTHREAD_HPP_
-
 #ifdef __cpluplus
 extern "C" {
 #endif
 
-#include <pthread.h>
+
 // #include <mqueue.h>
 #include <assert.h>
 #include <limits.h>
@@ -77,7 +76,7 @@ class MThread {
         ret = pthread_attr_setschedparam(&thread_attr, &schparam);
         assert(ret == 0);
 
-        ret = pthread_attr_setstacksize(&thread_attr, thread_stack_depth <= PTHREAD_STACK_MIN ? PTHREAD_STACK_MIN : thread_stack_depth);
+        ret = pthread_attr_setstacksize(&thread_attr, (thread_stack_depth <= PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : thread_stack_depth);
         assert(ret == 0);
 
         ret = pthread_create(&thread_handle, &thread_attr, task, (void *)this);

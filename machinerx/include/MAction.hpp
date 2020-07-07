@@ -40,8 +40,8 @@
 extern "C" {
 #endif
 #include <assert.h>
-#include <malloc.h>
-#include <pthread.h>
+// #include <malloc.h>
+// #include <pthread.h>
 
 #ifdef __cpluplus
 }
@@ -49,15 +49,15 @@ extern "C" {
 
 #include <functional>
 #include <vector>
+#include "MUtil.hpp"
+
+
+namespace MachineRX {
 
 inline static pthread_mutex_t gaction_initialization_mutex;
 inline void initialize_action_mutex(void) {
     pthread_mutex_init(&gaction_initialization_mutex, NULL);
 }
-
-namespace MachineRX {
-
-extern timespec gts_start;
 
 typedef uint32_t ad_t;
 
@@ -70,11 +70,12 @@ typedef struct {
     const char *name;
     const uint32_t length;
     ad_t id{'\0'};
-    pthread_mutex_t act_access_mutex{NULL};
+    pthread_mutex_t act_access_mutex{};
     void *actPtr{NULL};
 } MActionHandle_t;
 
 
+//TODO: Implement Service first - actions are an extension of services with progress feedback
 
 } // namespace MachineRX
 

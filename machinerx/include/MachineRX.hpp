@@ -31,7 +31,11 @@
 #ifndef _MACHINERX_HPP_
 #define _MACHINERX_HPP_
 
+#include "MUtil.hpp"
 #include "MThread.hpp"
 #include "MTopic.hpp"
+// #include "MParameter.hpp"
+// #include "MService.hpp"
+// #include "MAction.hpp"
 
 #endif  //_MACHINERX_HPP_
