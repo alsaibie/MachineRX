@@ -77,6 +77,7 @@
 #ifndef SEM_VALUE_MAX
     #define SEM_VALUE_MAX        0x7FFFU                                          /**< Maximum value of a sem_t. */
 #endif
+
 /**@} */
 
 /**

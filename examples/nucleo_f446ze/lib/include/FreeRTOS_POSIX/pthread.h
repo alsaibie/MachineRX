@@ -498,4 +498,10 @@ int pthread_setschedparam( pthread_t thread,
                            int policy,
                            const struct sched_param * param );
 
+// #if( configINCLUDE_FREERTOS_POSIX_THREAD_ADDITIONS_H == 1 )
+// 	#include "freertos_pthread_h_additions.h"
+// #endif
+int pthread_setname_np(pthread_t thread, const char *name);
+int pthread_getname_np(pthread_t thread, char *buf, size_t len);
+
 #endif /* _FREERTOS_POSIX_PTHREAD_H_ */

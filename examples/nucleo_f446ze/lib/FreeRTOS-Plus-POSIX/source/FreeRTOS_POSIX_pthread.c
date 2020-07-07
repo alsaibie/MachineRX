@@ -280,6 +280,7 @@ int pthread_attr_setstacksize( pthread_attr_t * attr,
     return iStatus;
 }
 
+
 /*-----------------------------------------------------------*/
 
 int pthread_create( pthread_t * thread,
@@ -364,6 +365,18 @@ int pthread_create( pthread_t * thread,
 
     return iStatus;
 }
+
+/*-----------------------------------------------------------*/
+// int pthread_setname_np(pthread_t thread, const char *name){
+//     int iStatus = 0;
+//     pthread_internal_t * pxThread = ( pthread_internal_t * ) thread;
+//     return iStatus;
+// }
+
+// int pthread_getname_np(pthread_t thread, char *buf, size_t len){
+//     //TODO: complete and move to additions file
+// }
+
 
 /*-----------------------------------------------------------*/
 
@@ -508,3 +521,7 @@ int pthread_setschedparam( pthread_t thread,
 }
 
 /*-----------------------------------------------------------*/
+
+#if( configINCLUDE_FREERTOS_POSIX_THREAD_ADDITIONS_H == 1 )
+	#include "freertos_pthread_c_additions.h"
+#endif
