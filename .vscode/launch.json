@@ -23,6 +23,24 @@
                     "ignoreFailures": true
                 }
             ]
-        }
+        },
+        {
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "request": "launch",
+            "name": "MachineRX NucleoF446ZE Debug",
+            // "executable": "${workspaceRoot}/examples/nucleo_f446ze/build/nucleo_f446ze.elf",
+            "executable": "./build/nucleo_f446ze.elf",
+            "rtos": "FreeRTOS",
+            "device": "STM32F446ZE",
+            // "showDevDebugOutput": true,
+            "armToolchainPath": "${workspaceRoot}/../arm_toolchain/bin/",
+            "configFiles": [
+                "interface/stlink-v2-1.cfg",
+                "target/stm32f4x_stlink.cfg",
+            ],
+            "cwd": "${workspaceRoot}/examples/nucleo_f446ze/",
+            "svdFile": "./STM32F446.svd",
+        },
     ]
 }
