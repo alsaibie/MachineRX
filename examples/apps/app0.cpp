@@ -22,23 +22,56 @@
  * SOFTWARE.
  * 
  * 
- * File: main_app.cpp
+ * File: app0.cpp
  * Project: MachineRX
  * Author: Ali AlSaibie (ali.alsaibie@ku.edu.kw)
  * -----
  * Modified By: Ali AlSaibie (ali.alsaibie@ku.edu.kw>)
  */
 
-#include "main_app.hpp"
 #include "MachineRX.hpp"
+#include "main_app.hpp"
+// #include "topic1.hpp"
+// #include "topic2.hpp"
 
-int main_app(int argc, char **argv){
+using namespace MachineRX;
 
-    //TODO: Add assert guards
-    MachineRX::initialize_start_timespec();
-    MachineRX::initialize_topic_mutex();
-    
-    start_application_0();
-    // start_application_1();
-    // start_application_2();
+class Application0 : public MThread {
+   public:
+    Application0() : MThread("Application 0", 512 * 4, 2, 1000) {
+    }
+    virtual ~Application0() {
+    }
+
+   protected:
+    virtual void run() {
+        printf("Thread Priority: %d\n", getThreadPriority());
+        printf("Thread Name: ");
+        printf("%s", getThreadName());
+        printf("\n");
+
+        while (1) {
+            struct timespec begin, end;
+            double elapsed;
+            clock_gettime(CLOCK_MONOTONIC, &begin);
+
+            printf("Hi From App 0\n");
+
+            thread_lap();
+
+            clock_gettime(CLOCK_MONOTONIC, &end);
+            elapsed = end.tv_sec - begin.tv_sec;
+            elapsed += (end.tv_nsec - begin.tv_nsec) / 1000000000.0L;
+            // printf("ET %0.2f ms\n", elapsed * 1000L);
+            printf("ET %i us\n", int(elapsed * 1000000L));
+        }
+    }
+
+   private:
+
+};
+
+void start_application_0() {
+    Application0 *ptr = new Application0();
+    ptr->start();
 }

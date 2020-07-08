@@ -45,7 +45,11 @@ extern "C" {
 
 #include <stdint.h>
 
-#define MAX_THREAD_NAME_SIZE 30
+#ifdef configMAX_TASK_NAME_LEN
+    #define MAX_THREAD_NAME_SIZE configMAX_TASK_NAME_LEN
+#else
+    #define MAX_THREAD_NAME_SIZE (20)
+#endif
 
 namespace MachineRX {
 
@@ -83,20 +87,20 @@ class MThread {
         assert(ret == 0);
 
         ret = pthread_setname_np(thread_handle, thread_name);
-        assert(ret == 0);
+        // assert(ret == 0);
     }
 
     inline const char *getThreadName() {
         uint32_t ret;
 
-        if (thread_name != NULL) {
-            return thread_name;
-        }
+        // if (thread_name != NULL) {
+        //     return thread_name;
+        // }
 
         static char buf[MAX_THREAD_NAME_SIZE]{};
 
         ret = pthread_getname_np(thread_handle, buf, MAX_THREAD_NAME_SIZE);
-        assert(ret == 0);
+        // assert(ret == 0);
 
         thread_name = buf;
         return thread_name;

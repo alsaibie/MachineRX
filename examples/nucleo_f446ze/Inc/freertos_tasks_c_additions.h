@@ -1,10 +1,9 @@
 #ifndef FREERTOS_TASKS_C_ADDITIONS_H
 #define FREERTOS_TASKS_C_ADDITIONS_H
 
-#include <stdint.h>
-
-int pcTaskSetName(TaskHandle_t xTaskToConfigure, const char *pcName) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+void pcTaskSetName(TaskHandle_t xTaskToConfigure, const char *pcName)
 {
+    /* adapted from xTaskCreate */
     TCB_t *pxTCB;
     pxTCB = prvGetTCBFromHandle(xTaskToConfigure);
     const char *pcname = pxTCB->pcTaskName;

@@ -1,6 +1,6 @@
 SET(CMAKE_SYSTEM_NAME Generic) #STM32?
 SET(CMAKE_SYSTEM_VERSION 1)
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.5)
 
 SET(LOCAL_ARM_TOOLCHAIN $ENV{HOME}/arm_toolchain/bin/)
 
@@ -123,8 +123,7 @@ include_directories(
 
 add_executable(${PROJECT_NAME}.elf ${PROJECT_SOURCES} ${LINKER_SCRIPT})
 # TODO: cleanup the flags
-set(CMAKE_EXE_LINKER_FLAGS
-    "${CMAKE_EXE_LINKER_FLAGS} -lc -lm -lnosys -specs=nano.specs -specs=nosys.specs -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc -lm -lnosys -specs=nano.specs -specs=nosys.specs -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++")
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)

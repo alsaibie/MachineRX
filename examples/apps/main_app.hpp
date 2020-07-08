@@ -43,6 +43,7 @@ int main_app(int argc, char **argv);
 }
 #endif
 
+void start_application_0(void);
 void start_application_1(void);
 void start_application_2(void);
 

@@ -28,7 +28,7 @@
 #include "FreeRTOS.h"
 #include "mxr_allocators.h"
 #include "task.h"
-
+#include "stdio.h"
 // #include "main_app.hpp"
 #include <pthread.h>
 /* USER CODE END Includes */
@@ -142,7 +142,7 @@ int main(void) {
     MX_I2C1_Init();
     MX_USART2_UART_Init();
     /* USER CODE BEGIN 2 */
-    printf_uart = &huart3;
+    printf_uart = & huart3;
     /* USER CODE END 2 */
 
     /* Init scheduler */
@@ -432,16 +432,12 @@ void StartDefaultTask(void *argument) {
     mxr_allocator.free = &vPortFree;
 
     /* Infinite loop */
-
+    printf("Starting Main App\n");
     main_app(NULL, NULL);
-    // pthread_t inc_x_thread;
-    // int x = 0;
-    // if (pthread_create(&inc_x_thread, NULL, testfunc, &x)) {
-    //     // fprintf(stderr, "Error creating thread\n");
-    //     return 1;
-    // }
 
     for (;;) {
+        // printf("Hello\n");
+
         HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
         osDelay(1000);
     }
