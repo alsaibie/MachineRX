@@ -27,8 +27,8 @@
 /* USER CODE BEGIN Includes */
 #include "FreeRTOS.h"
 #include "mxr_allocators.h"
-#include "task.h"
 #include "stdio.h"
+#include "task.h"
 // #include "main_app.hpp"
 #include <pthread.h>
 /* USER CODE END Includes */
@@ -62,7 +62,9 @@ osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
     .name = "defaultTask",
     .priority = (osPriority_t)osPriorityBelowNormal,
-    .stack_size = 1500 * 4};
+    .stack_size = 256 * 4};
+
+extern bool applications_started;
 /* USER CODE BEGIN PV */
 
 mxr_allocator_t mxr_allocator;
@@ -105,8 +107,15 @@ int _write(int file, char *ptr, int len) {
     return len;
 }
 
-void *testfunc(void *arg) {
+void __malloc_lock(struct _reent *REENT) {
+    vTaskSuspendAll();
 }
+
+
+void __malloc_unlock(struct _reent *REENT) {
+    xTaskResumeAll();
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -142,7 +151,7 @@ int main(void) {
     MX_I2C1_Init();
     MX_USART2_UART_Init();
     /* USER CODE BEGIN 2 */
-    printf_uart = & huart3;
+    printf_uart = &huart3;
     /* USER CODE END 2 */
 
     /* Init scheduler */
@@ -150,6 +159,7 @@ int main(void) {
 
     /* USER CODE BEGIN RTOS_MUTEX */
     /* add mutexes, ... */
+
     /* USER CODE END RTOS_MUTEX */
 
     /* USER CODE BEGIN RTOS_SEMAPHORES */
@@ -169,9 +179,14 @@ int main(void) {
     defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
     /* USER CODE BEGIN RTOS_THREADS */
-    /* add threads, ... */
+    /* USER CODE BEGIN 5 */
+    printf("Starting Main App\n");
+    osDelay(10);
     /* USER CODE END RTOS_THREADS */
-
+    mxr_allocator.malloc = &pvPortMalloc;
+    mxr_allocator.free = &vPortFree;
+    main_app(NULL, NULL);
+ 
     /* Start scheduler */
     osKernelStart();
 
@@ -427,17 +442,9 @@ static void MX_GPIO_Init(void) {
   */
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument) {
-    /* USER CODE BEGIN 5 */
-    mxr_allocator.malloc = &pvPortMalloc;
-    mxr_allocator.free = &vPortFree;
-
-    /* Infinite loop */
-    printf("Starting Main App\n");
-    main_app(NULL, NULL);
 
     for (;;) {
         // printf("Hello\n");
-
         HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
         osDelay(1000);
     }
