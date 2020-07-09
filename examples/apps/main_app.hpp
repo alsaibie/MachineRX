@@ -37,12 +37,15 @@ extern "C"
 {
 #endif
 
+extern bool applications_started;
 int main_app(int argc, char **argv);
+void start_application_test_FreeRTOS_mutex();
+void start_application_test_FreeRTOS_POSIX_mutex();
 
 #ifdef __cplusplus
 }
 #endif
-
+void start_application_multi_thread_mutex_printf();
 void start_application_0(void);
 void start_application_1(void);
 void start_application_2(void);

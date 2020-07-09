@@ -30,15 +30,49 @@
  */
 
 #include "main_app.hpp"
+
 #include "MachineRX.hpp"
+#include "topic1.hpp"
+#include "FreeRTOS.h"
+#include "task.h"
 
-int main_app(int argc, char **argv){
+bool applications_started = false;
+void* operator new( size_t size )
+{
+    if (xTaskGetSchedulerState() == 1)
+    {
+        //what should I do???????
+    }
+    return pvPortMalloc( size );
+}
 
+void* operator new[]( size_t size )
+{
+    return pvPortMalloc(size);
+}
+
+void operator delete( void * ptr )
+{
+    vPortFree ( ptr );
+}
+
+void operator delete[]( void * ptr )
+{
+    vPortFree ( ptr );
+}
+int main_app(int argc, char **argv) {
     //TODO: Add assert guards
+    size_t heapfree = xPortGetFreeHeapSize();
     MachineRX::initialize_start_timespec();
-    MachineRX::initialize_topic_mutex();
-    
-    start_application_0();
-    // start_application_1();
+    MachineRX::msleep(1);
+
+    // start_application_0();
+    start_application_1();
+    // start_application_multi_thread_mutex_printf();
+    // start_application_test_FreeRTOS_POSIX_mutex();
+    // start_application_test_FreeRTOS_mutex();
+
+    heapfree = xPortGetFreeHeapSize();
+
     // start_application_2();
 }

@@ -31,17 +31,16 @@
 
 #ifndef _MTOPIC_HPP_
 #define _MTOPIC_HPP_
-#include "MUtil.hpp"
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+
+#include "MUtil.hpp"
 
 #ifdef __cpluplus
 extern "C" {
 #endif
 #include <assert.h>
-// #include <malloc.h>
-// #include "pthread.h"
 
 #ifdef __cpluplus
 }
@@ -50,15 +49,11 @@ extern "C" {
 #include <functional>
 #include <vector>
 
-
 //TODO: Add assert guards
-
 namespace MachineRX {
 
-inline static pthread_mutex_t gtopic_initialization_mutex;
-inline void initialize_topic_mutex(void) {
-    pthread_mutex_init(&gtopic_initialization_mutex, NULL);
-}
+// inline static pthread_mutex_t gtopic_initialization_mutex;
+inline pthread_mutex_t gtopic_initialization_mutex{0};
 
 typedef uint32_t td_t;
 
@@ -70,8 +65,8 @@ struct _msgCore {
 typedef struct {
     const char *name;
     const uint32_t length;
+    pthread_mutex_t &msg_access_mutex;
     td_t id{'\0'};
-    pthread_mutex_t msg_access_mutex{};
     void *msgPtr{NULL};
 } MTopicHandle_t;
 
@@ -94,25 +89,36 @@ class MTopicBase_ {
     inline static bool time_spec_offset{false};
     inline static uint32_t id_counter{0};
 
-   protected:
-    MTopicBase_(MTopicHandle_t &th_, uint32_t msgSize_) : th(th_), msgSize(msgSize_) {
+    void initialize(void) {
         if (th.id == '\0') {
-            pthread_mutex_lock(&gtopic_initialization_mutex);
-            /* Check again in case it was initialized while waiting for mutex lock */
-            if (th.id == '\0') {
-                th.id = id_counter + 1;
-                id_counter++;
-                pthread_mutex_init(&th.msg_access_mutex, NULL);
-                th.msgPtr = create_shared_memspace(msgSize);
-                ptrMTH.push_back(&th);
+            struct timespec timeoutTime;
+            clock_gettime(CLOCK_MONOTONIC, &timeoutTime);
+            timeoutTime.tv_sec += 1;
+            if (pthread_mutex_timedlock(&gtopic_initialization_mutex, &timeoutTime) == 0) {
+                /* Check again in case it was initialized while waiting for mutex lock */
+                if (th.id == '\0') {
+                    th.id = id_counter + 1;
+                    id_counter++;
+                    th.msg_access_mutex = {0};
+                    th.msgPtr = create_shared_memspace(msgSize);
+                    ptrMTH.push_back(&th);
+                }
+                pthread_mutex_unlock(&gtopic_initialization_mutex);
+
+            } else {
+                printf("Can't initialize Topic - Timeout\n");
             }
-            pthread_mutex_unlock(&gtopic_initialization_mutex);
         }
     }
+
+   protected:
+    MTopicBase_(MTopicHandle_t &th_, uint32_t msgSize_) : th(th_), msgSize(msgSize_) {
+    }
+
     ~MTopicBase_() {
         //TODO: pop out of vector ptrMTH
         //TODO: release mutex
-        //TODO: 
+        //TODO:
         destroy_shared_memspace();
     }
 
@@ -129,7 +135,7 @@ class MTopicBase_ {
     inline void destroy_shared_memspace() {
         mxr_allocator.free(th.msgPtr);  //TODO: replace with custom per platform dealloc
     }
-};  
+};
 
 template <typename MTopicMsgT>
 class MTopicPublisher : public MTopicBase_ {
@@ -141,9 +147,18 @@ class MTopicPublisher : public MTopicBase_ {
         _msgCore *msgCore = static_cast<_msgCore *>(&msg);
         msgCore->msg_count++;
         msgCore->tick_stamp_ms = uptime_ms();
-        pthread_mutex_lock(&th.msg_access_mutex);  // TODO: replace with a timed lock, or try lock?
-        (void)memcpy((void *)th.msgPtr, &msg, (size_t)msgSize);
-        pthread_mutex_unlock(&th.msg_access_mutex);
+        struct timespec timeoutTime;
+        clock_gettime(CLOCK_MONOTONIC, &timeoutTime);
+        timeoutTime.tv_nsec += 10 * 1000000L;
+        // if (pthread_mutex_timedlock(&gTopic1_access_mutex_test, &timeoutTime) == 0) {
+        //     (void)memcpy((void *)th.msgPtr, &msg, (size_t)msgSize);
+        //     pthread_mutex_unlock(&gTopic1_access_mutex_test);
+        // }
+        if (pthread_mutex_timedlock(&th.msg_access_mutex, &timeoutTime) == 0) {
+            (void)memcpy((void *)th.msgPtr, &msg, (size_t)msgSize);
+            pthread_mutex_unlock(&th.msg_access_mutex);
+        }
+
         // TODO: Implement a msg queue of a given length - subscribers may need to process a buffer
         // TODO: Alternatively, have the the receiver accumulate data if needed and then process on demand.
     }

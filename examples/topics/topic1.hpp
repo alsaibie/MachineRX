@@ -43,7 +43,10 @@ typedef struct : public _msgCore {
 
 } Topic1_msg_t;
 
-inline MachineRX::MTopicHandle_t gTopic1MTHandle{"Topic 1", 1}; /* The rest NULLs */
+namespace MachineRX {
+inline pthread_mutex_t gTopic1_access_mutex{0};
 
+inline MachineRX::MTopicHandle_t gTopic1MTHandle{"Topic 1", 1, gTopic1_access_mutex}; /* The rest NULLs */
+}
 
 #endif /* _TOPIC1_HPP_ */

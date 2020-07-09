@@ -43,7 +43,9 @@ typedef struct : public _msgCore {
 
 } Topic2_msg_t;
 
-inline MachineRX::MTopicHandle_t gTopic2MTHandle{"Topic 2", 1};
+inline pthread_mutex_t gTopic2_access_mutex{0};
+
+inline MachineRX::MTopicHandle_t gTopic2MTHandle{"Topic 2", 1, gTopic2_access_mutex};
 
 
 #endif /* _TOPIC2_HPP_ */

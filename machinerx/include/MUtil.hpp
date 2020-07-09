@@ -35,13 +35,11 @@
 //TODO: move time management functions here
 //TODO:
 
-
-
 extern "C" {
 // #include "FreeRTOS_POSIX/pthread.h"
 // #include "FreeRTOS.h"
-#include <pthread.h>
 #include <assert.h>
+#include <pthread.h>
 // #include <malloc.h>
 // #include "pthread.h"
 #include "mxr_allocators.h"
@@ -51,11 +49,11 @@ extern "C" {
 
 // Some defines for compatability
 #ifndef SCHED_RR
-    #define SCHED_RR 2
-#endif 
+#define SCHED_RR 2
+#endif
 
 #ifndef PTHREAD_STACK_MIN
-    #define PTHREAD_STACK_MIN 512
+#define PTHREAD_STACK_MIN 512
 #endif
 
 namespace MachineRX {
@@ -85,6 +83,12 @@ inline uint32_t timespec_to_ms(struct timespec &ts) {
     return t_ms;
 }
 
+inline void msleep(uint32_t ms) {
+    struct timespec ts_;
+    ts_.tv_sec = ms / 1000L;
+    ts_.tv_nsec = (ms % 1000L) * 1000000L;
+    nanosleep(&ts_, NULL);
+}
 
 }  // namespace MachineRX
 

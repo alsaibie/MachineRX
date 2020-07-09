@@ -70,8 +70,9 @@ class Application0 : public MThread {
    private:
 
 };
-
+Application0 app0;
 void start_application_0() {
-    Application0 *ptr = new Application0();
-    ptr->start();
+    // Application0 *ptr = new Application0();
+    // ptr->start();
+    app0.start();
 }

@@ -47,6 +47,8 @@ class Application2 : public MThread {
 
    protected:
     virtual void run() {
+        topic_1_sub.initialize();
+        topic_2_pub.initialize();
         printf("Thread Priority: %d\n", getThreadPriority());
         printf("Thread Name: ");
         printf("%s", getThreadName());
@@ -89,7 +91,9 @@ class Application2 : public MThread {
     Topic1_msg_t topic1Msg;
 };
 
+Application2 app2;
 void start_application_2() {
-    Application2 *ptr = new Application2();
-    ptr->start();
+    // Application2 *ptr = new Application2();
+    // ptr->start();
+    app2.start();
 }

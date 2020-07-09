@@ -30,6 +30,8 @@
  */
 #ifndef _MTHREAD_HPP_
 #define _MTHREAD_HPP_
+
+#include "MUtil.hpp"
 #ifdef __cpluplus
 extern "C" {
 #endif
@@ -87,20 +89,20 @@ class MThread {
         assert(ret == 0);
 
         ret = pthread_setname_np(thread_handle, thread_name);
-        // assert(ret == 0);
+        assert(ret == 0);
     }
 
     inline const char *getThreadName() {
         uint32_t ret;
 
-        // if (thread_name != NULL) {
-        //     return thread_name;
-        // }
+        if (thread_name != NULL) {
+            return thread_name;
+        }
 
         static char buf[MAX_THREAD_NAME_SIZE]{};
 
         ret = pthread_getname_np(thread_handle, buf, MAX_THREAD_NAME_SIZE);
-        // assert(ret == 0);
+        assert(ret == 0);
 
         thread_name = buf;
         return thread_name;
@@ -162,12 +164,7 @@ class MThread {
         // thread_start_ticks = xTaskGetTickCount();
     }
 
-    inline void msleep(uint32_t ms) {
-        struct timespec ts_;
-        ts_.tv_sec = ms / 1000L;
-        ts_.tv_nsec = (ms % 1000L) * 1000000L;
-        nanosleep(&ts_, NULL);
-    }
+
 
    private:
     const char *thread_name;
