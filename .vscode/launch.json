@@ -6,10 +6,10 @@
     "configurations": [
         
         {
-            "name": "MachineRX Host Debug",
+            "name": "MachineRPX Host Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/examples/host/build/Host.elf",
+            "program": "${workspaceFolder}/examples_rpx/host/build/Host.elf",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
@@ -28,8 +28,7 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "request": "launch",
-            "name": "MachineRX NucleoF446ZE Debug",
-            // "executable": "${workspaceRoot}/examples/nucleo_f446ze/build/nucleo_f446ze.elf",
+            "name": "MachineRPX NucleoF446ZE Debug",
             "executable": "./build/nucleo_f446ze.elf",
             "rtos": "FreeRTOS",
             "device": "STM32F446ZE",
@@ -39,7 +38,7 @@
                 "interface/stlink-v2-1.cfg",
                 "target/stm32f4x_stlink.cfg",
             ],
-            "cwd": "${workspaceRoot}/examples/nucleo_f446ze/",
+            "cwd": "${workspaceRoot}/examples_rpx/nucleo_f446ze/",
             "svdFile": "./STM32F446.svd",
         },
     ]
