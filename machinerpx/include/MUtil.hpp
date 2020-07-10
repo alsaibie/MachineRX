@@ -36,12 +36,8 @@
 //TODO:
 
 extern "C" {
-// #include "FreeRTOS_POSIX/pthread.h"
-// #include "FreeRTOS.h"
 #include <assert.h>
 #include <pthread.h>
-// #include <malloc.h>
-// #include "pthread.h"
 #include "mrpx_allocators.h"
 }
 

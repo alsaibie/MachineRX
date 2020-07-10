@@ -34,18 +34,8 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-
 #include "MUtil.hpp"
-
-#ifdef __cpluplus
-extern "C" {
-#endif
-#include <assert.h>
-
-#ifdef __cpluplus
-}
-#endif
-
+#include <cassert>
 #include <functional>
 #include <vector>
 

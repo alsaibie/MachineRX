@@ -44,7 +44,7 @@ typedef struct : public _msgCore {
 
 // inline pthread_mutex_t gTopic1_access_mutex{0};
 
-inline MachineRPX::MTopicHandle_t gTopic1MTHandle{"Topic 1", 1}; /* The rest NULLs */
+inline MTopicHandle_t gTopic1MTHandle{"Topic 1", 1}; /* The rest NULLs */
 }  // namespace MachineRPX
 
 #endif /* _TOPIC1_HPP_ */

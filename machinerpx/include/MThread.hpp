@@ -92,7 +92,7 @@ class MThread {
         assert(ret == 0);
     }
 
-    inline const char *getThreadName() {
+    inline const char *getName() {
         uint32_t ret;
 
         if (thread_name != NULL) {
@@ -108,7 +108,7 @@ class MThread {
         return thread_name;
     }
 
-    inline const uint32_t getThreadPriority() {
+    inline const uint32_t getPriority() {
         /* Explicit get priority call */
         struct sched_param param;
         int ret;

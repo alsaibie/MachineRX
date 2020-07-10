@@ -179,14 +179,13 @@ int main(void) {
     defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
     /* USER CODE BEGIN RTOS_THREADS */
-    /* USER CODE BEGIN 5 */
     printf("Starting Main App\n");
     osDelay(10);
-    /* USER CODE END RTOS_THREADS */
     mrpx_allocator.malloc = &pvPortMalloc;
     mrpx_allocator.free = &vPortFree;
     main_app(NULL, NULL);
- 
+     /* USER CODE END RTOS_THREADS */
+     
     /* Start scheduler */
     osKernelStart();
 
@@ -442,9 +441,8 @@ static void MX_GPIO_Init(void) {
   */
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument) {
-
+    /* USER CODE BEGIN 5 */
     for (;;) {
-        // printf("Hello\n");
         HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
         osDelay(1000);
     }
