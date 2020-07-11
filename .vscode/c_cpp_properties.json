@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "MachineRFX-Nucleo",
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "compilerPath": "/usr/bin/arm-none-eabi-g++",
+            "configurationProvider": "ms-vscode.cmake-tools",
+            "cppStandard": "c++17",
+            "cStandard": "c11",
+            "includePath": [
+                "${workspaceFolder}/machinerfx/include",
+                "${workspaceFolder}/examples_rfx/nucleo_f446ze/Inc",
+                "${workspaceFolder}/examples_rfx/nucleo_f446ze/Drivers/STM32F4xx_HAL_Driver/Inc",
+                "${workspaceFolder}/examples_rfx/nucleo_f446ze/Middlewares/Third_Party/FreeRTOS/Source/**"
+            ],
+            "intelliSenseMode": "gcc-arm"
+        }
+    ],
+    "version": 4
+}
