@@ -20,15 +20,16 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+
 #include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "FreeRTOS.h"
-#include "task.h"
+#include "app_starter.hpp"
 #include "mrfx_allocators.h"
 #include "stdio.h"
-#include "app_starter.hpp"
+#include "task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,11 +89,17 @@ UART_HandleTypeDef *printf_uart = NULL;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+#define USE_SWO_PRINTF_TRACING
 int __io_putchar(int ch) {
     uint8_t c[1];
     c[0] = ch & 0x00FF;
     if (printf_uart != NULL) {
+#ifdef USE_SWO_PRINTF_TRACING
+        ITM_SendChar((char)c[0]);
+#else
         HAL_UART_Transmit(printf_uart, &c[0], 1, 10);
+#endif
     }
     return ch;
 }
@@ -108,7 +115,6 @@ int _write(int file, char *ptr, int len) {
 void __malloc_lock(struct _reent *REENT) {
     vTaskSuspendAll();
 }
-
 
 void __malloc_unlock(struct _reent *REENT) {
     xTaskResumeAll();
@@ -183,7 +189,7 @@ int main(void) {
     mrfx_allocator.free = &vPortFree;
     app_starter(NULL, NULL);
     /* USER CODE END RTOS_THREADS */
-    
+
     /* Start scheduler */
     osKernelStart();
 

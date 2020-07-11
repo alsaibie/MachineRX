@@ -4,7 +4,6 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
         {
             "name": "MachineRPX Host Debug",
             "type": "cppdbg",
@@ -40,6 +39,21 @@
             ],
             "cwd": "${workspaceRoot}/examples_rfx/nucleo_f446ze/",
             "svdFile": "./STM32F446.svd",
+            "interface": "swd",
+            "swoConfig": {
+                "source": "probe",
+                "enabled": true,
+                "swoFrequency": 2000000,
+                "cpuFrequency": 168000000,
+                "decoders": [
+                    {
+                        "port": 0,
+                        "type": "console",
+                        "label": "Output"
+                    }
+                ]
+            },
+            
         },
         {
             "type": "cortex-debug",
