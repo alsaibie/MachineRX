@@ -35,9 +35,11 @@
 #include "topic2.hpp"
 
 using namespace MachineRFX;
+
+/* App 1 */
 class AppPubSub1 : public MRXThread {
    public:
-    AppPubSub1() : MRXThread("PubSub 1", 512, MRXPriority_n::Normal, 500),
+    AppPubSub1() : MRXThread("PubSub 1", 512, MRXPriority_n::Normal, 100),
                    topic_1_pub(gTopic1MTHandle),
                    topic_2_sub(gTopic2MTHandle,
                                std::bind(&AppPubSub1::on_topic_2_read, this, std::placeholders::_1)) {
@@ -53,6 +55,8 @@ class AppPubSub1 : public MRXThread {
         printf("%s", getName());
         printf("\n");
 
+        // vTaskDelay(1);
+
         while (1) {
             topic1Msg.P.a = 1;
 
@@ -67,18 +71,68 @@ class AppPubSub1 : public MRXThread {
    private:
     void on_topic_2_read(const Topic2_msg_t &msg) {
         topic2Msg = msg;
-        printf("App 1 Received Message - Count: %i, Time(ms): %i\n", topic2Msg.msg_count, topic2Msg.tick_stamp);
+        printf("App 1 R M - Count: %i, Time(ms): %i\n", topic2Msg.msg_count, topic2Msg.tick_stamp);
+        toggleLD2();
     }
 
     /* Topic Pubs */
     MRXTopicPublisher<Topic1_msg_t> topic_1_pub;
     Topic1_msg_t topic1Msg;
+
     /* Topic Subs */
     MRXTopicSubscriber<Topic2_msg_t> topic_2_sub;
     Topic2_msg_t topic2Msg;
 };
 
-void start_application_pubsub_1() {
-    AppPubSub1 *ptr = new AppPubSub1();
-    ptr->start();
+/* App 2 */
+class AppPubSub2 : public MRXThread {
+   public:
+    AppPubSub2() : MRXThread("PubSub 2", 512, MRXPriority_n::Normal, 100),
+                   topic_2_pub(gTopic2MTHandle),
+                   topic_1_sub(gTopic1MTHandle,
+                               std::bind(&AppPubSub2::on_topic_1_read, this, std::placeholders::_1)) {
+        //  printf("Hi\n");
+    }
+    virtual ~AppPubSub2() {
+    }
+
+   protected:
+    virtual void run() {
+        printf("Thread Priority: %d\n", (int)getPriority());
+        printf("Thread Name: ");
+        printf("%s", getName());
+        printf("\n");
+
+        while (1) {
+            topic2Msg.P.a = 1;
+
+            topic_2_pub.publish(topic2Msg);
+
+            topic_1_sub.read();
+
+            thread_lap();
+        }
+    }
+
+   private:
+    void on_topic_1_read(const Topic1_msg_t &msg) {
+        topic1Msg = msg;
+        printf("App 2 R M - Count: %i, Time(ms): %i\n", topic1Msg.msg_count, topic1Msg.tick_stamp);
+        toggleLD3();
+    }
+
+    /* Topic Pubs */
+    MRXTopicPublisher<Topic2_msg_t> topic_2_pub;
+    Topic2_msg_t topic2Msg;
+    /* Topic Subs */
+
+    MRXTopicSubscriber<Topic1_msg_t> topic_1_sub;
+    Topic1_msg_t topic1Msg;
+};
+
+void start_application_pubsub_example() {
+    AppPubSub1 *ptr1 = new AppPubSub1();
+    ptr1->start();
+    AppPubSub2 *ptr2 = new AppPubSub2();
+    ptr2->start();
 }

@@ -33,6 +33,5 @@
 
 int app_starter(int argc, char **argv){
     //TODO: link apps to run through cmake
-    start_application_pubsub_1();
-    start_application_pubsub_2();
+    start_application_pubsub_example();
 } 

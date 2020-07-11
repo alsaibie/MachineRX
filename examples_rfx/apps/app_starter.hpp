@@ -40,7 +40,6 @@ int app_starter(int argc, char **argv);
 }
 #endif
 
-void start_application_pubsub_1(void);
-void start_application_pubsub_2(void);
+void start_application_pubsub_example(void);
 
 #endif  //_APP_STARTER_HPP_
