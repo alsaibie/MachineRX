@@ -90,17 +90,19 @@ UART_HandleTypeDef *printf_uart = NULL;
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-#define USE_SWO_PRINTF_TRACING
+// #define USE_SWO_PRINTF_TRACING
 int __io_putchar(int ch) {
     uint8_t c[1];
     c[0] = ch & 0x00FF;
-    if (printf_uart != NULL) {
+
 #ifdef USE_SWO_PRINTF_TRACING
-        ITM_SendChar((char)c[0]);
+    ITM_SendChar((char)c[0]);
 #else
+    if (printf_uart != NULL) {
         HAL_UART_Transmit(printf_uart, &c[0], 1, 10);
-#endif
     }
+#endif
+
     return ch;
 }
 
