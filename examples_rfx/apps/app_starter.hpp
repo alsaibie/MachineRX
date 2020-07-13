@@ -41,5 +41,7 @@ int app_starter(int argc, char **argv);
 #endif
 
 void start_application_pubsub_example(void);
+void start_application_pub_multi_sub_example(void);
+void start_application_multi_pub_single_sub_example(void);
 
 #endif  //_APP_STARTER_HPP_

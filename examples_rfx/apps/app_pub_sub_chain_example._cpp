@@ -1,0 +1,126 @@
+/*
+ * MIT License
+ * 
+ * Copyright (c) 2020 Ali AlSaibie
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ * 
+ * File: app_pub_sub_chain_example.cpp
+ * Project: MachineRX
+ * Author: Ali AlSaibie (ali.alsaibie@ku.edu.kw)
+ * -----
+ * Modified By: Ali AlSaibie (ali.alsaibie@ku.edu.kw>)
+ */
+ 
+#include "MachineRFX.hpp"
+#include "app_starter.hpp"
+#include "topic1.hpp"
+#include "topic2.hpp"
+#include "topic3.hpp"
+#include "topic4.hpp"
+#include "topic5.hpp"
+
+#include <string>
+
+#include "stm32f4xx_hal.h"
+
+using namespace MachineRFX;
+
+/* Publisher */ 
+class PublisherApp : public MRXThread {
+   public:
+    PublisherApp(uint32_t num_) : num(num_), MRXThread("Publisher", 256, MRXPriority_n::RealTime, 100),
+                  topic_1_pub(gTopic1MTHandle) {
+    }
+    virtual ~PublisherApp() {
+    }
+
+   protected:
+    virtual void run() {
+        printf("Thread Priority: %d\n", (int)getPriority());
+        printf("Thread Name: ");
+        printf("%s", getName());
+        printf("\n");
+
+        while (1) {
+            topic1Msg.P.a = num;
+            topic_1_pub.publish(topic1Msg);
+            thread_lap();
+        }
+    }
+
+   private:
+    /* Topic Pubs */
+    uint32_t num; 
+    MRXTopicPublisher<Topic1_msg_t> topic_1_pub;
+    Topic1_msg_t topic1Msg;
+};
+
+class SubscriberApp : public MRXThread {
+   public:
+    SubscriberApp() :
+    MRXThread("Subscriber", 256, MRXPriority_n::RealTime, 1), 
+    topic_1_sub(gTopic1MTHandle, std::bind(&SubscriberApp::on_topic_1_read, this, std::placeholders::_1)) {
+    }
+    virtual ~SubscriberApp() {
+    }
+
+   protected:
+    virtual void run() {
+        printf("Thread Priority: %d\n", (int)getPriority());
+        printf("Thread Name: ");
+        printf("%s", getName());
+        printf("\n");
+
+        /* This is one of many tasks that wait for a new specific shared topic */
+        while (1) {
+
+            while(!topic_1_sub.read()){
+                /* Zero-wait task yield - a reschedule only */
+                vTaskDelay(0);
+            };
+
+            //TODO: do some mathematical processes
+
+            // thread_lap(); /* Thread doesn't lap, only waits on new data */
+        }
+    }
+
+   private:
+    void on_topic_1_read(const Topic1_msg_t &msg) {
+        topic1Msg = msg;
+        uint8_t latency = HAL_GetTick() - topic1Msg.tick_stamp;
+        printf("S%i#%iL%ims\n", sub_num, topic1Msg.msg_count, latency);
+        // toggleLD3();
+    }
+    /* Topic Subs */
+
+    MRXTopicSubscriber<Topic1_msg_t> topic_1_sub;
+    Topic1_msg_t topic1Msg;
+};
+
+void start_application_pub_multi_sub_example() {
+    PublisherApp *ptr1 = new PublisherApp();
+    ptr1->start();
+    for (uint8_t k = 0; k < 10; k++) {
+        SubscriberApp *ptr2 = new SubscriberApp(k);
+        ptr2->start();
+    }
+}

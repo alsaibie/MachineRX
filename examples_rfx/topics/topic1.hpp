@@ -36,11 +36,10 @@
 namespace MachineRFX {
 typedef struct : public _msgCore {
     struct {
-        int a{0};
-        char buf[20]{};
-        float f{};
+        uint32_t a{0};
+        // char buf[20]{};
+        // float f{};
     } P;
-
 } Topic1_msg_t;
 
 inline MRXTopicHandle_t gTopic1MTHandle{"Topic 1"};

@@ -28,8 +28,8 @@
  * -----
  * Modified By: Ali AlSaibie (ali.alsaibie@ku.edu.kw>)
  */
-#ifndef _TOPIC2_HPP_
-#define _TOPIC2_HPP_
+#ifndef _TOPIC5_HPP_
+#define _TOPIC5_HPP_
 
 #include "MRXTopic.hpp"
 
@@ -40,9 +40,9 @@ typedef struct : public _msgCore {
         char buf[20]{};
         float f{};
     } P;
-} Topic2_msg_t;
+} Topic5_msg_t;
 
-inline MRXTopicHandle_t gTopic2MTHandle{"Topic 2"};
+inline MRXTopicHandle_t gTopic5MTHandle{"Topic 5"};
 }  // namespace MachineRPX
 
-#endif /* _TOPIC1_HPP_ */
+#endif /* _TOPIC5_HPP_ */
