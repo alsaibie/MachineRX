@@ -106,9 +106,6 @@ enum class MRXPriority_n{
     Realtime5 = 48+5,      /* (Realtime + 5) */
     Realtime6 = 48+6,      /* (Realtime + 6) */
     Realtime7 = 48+7,      /* (Realtime + 7) */
-
-    RealTime = +3,         /* realtime (highest) */
-
     ISR = 56,              /* reserved for ISR */
 
     Error = -1             /* system cannot determine priority or thread has illegal priority */
@@ -118,6 +115,7 @@ inline void uSleep(uint32_t t_us) {
 
 }
 
+//TODO: remove these system dependent functions
 inline void toggleLD2(){
     HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 }
