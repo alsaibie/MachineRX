@@ -34,6 +34,8 @@
 #include "topic1.hpp"
 #include "topic2.hpp"
 
+#include <memory>
+
 using namespace MachineRFX;
 
 /* App 1 */
@@ -130,9 +132,10 @@ class AppPubSub2 : public MRXThread {
     Topic1_msg_t topic1Msg;
 };
 
+
+AppPubSub1 pubsub1;
+AppPubSub2 pubsub2;
 void start_application_pubsub_example() {
-    AppPubSub1 *ptr1 = new AppPubSub1();
-    ptr1->start();
-    AppPubSub2 *ptr2 = new AppPubSub2();
-    ptr2->start();
+    pubsub1.start();
+    pubsub2.start();
 }

@@ -90,7 +90,7 @@ UART_HandleTypeDef *printf_uart = NULL;
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-// #define USE_SWO_PRINTF_TRACING
+#define USE_SWO_PRINTF_TRACING
 int __io_putchar(int ch) {
     uint8_t c[1];
     c[0] = ch & 0x00FF;
