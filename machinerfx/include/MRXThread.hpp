@@ -76,6 +76,7 @@ class MRXThread {
     MRXThread(const char *name, uint32_t stack_depth, MRXPriority_n priority, uint32_t Ts_ms)
         : thread_stack_depth(stack_depth),
           thread_priority(priority),
+          t_sampling_ms(Ts_ms),
           t_sampling_ticks(pdMS_TO_TICKS(Ts_ms)),
           initializedDelay(false) {
         thread_name = name;
@@ -107,6 +108,7 @@ class MRXThread {
         thread_start_ticks = xTaskGetTickCount();
     }
 
+    uint32_t t_sampling_ms;
    private:
     const char *thread_name;
     TaskHandle_t task_handle;
